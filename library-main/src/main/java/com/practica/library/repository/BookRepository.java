@@ -48,4 +48,17 @@ public class BookRepository {
         }
         return false;
     }
+
+
+    public boolean patchTitleBook(Long id, Book book) {
+        Optional<Book> first = books.stream()
+                .filter(b -> b.getId().equals(id))
+                .findFirst();
+        if(first.isPresent()){
+            logger.info("patching book with ID " + id);
+            Optional.ofNullable(book.getName()).ifPresent( name -> first.get().setName(name));
+            return true;
+        }
+        return false;
+    }
 }

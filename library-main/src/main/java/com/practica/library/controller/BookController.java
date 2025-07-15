@@ -5,6 +5,7 @@ import com.practica.library.model.Book;
 import com.practica.library.model.BookDTO;
 import com.practica.library.service.BookService;
 import jakarta.websocket.server.PathParam;
+import jdk.jfr.Description;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -69,6 +70,26 @@ public class BookController {
             return ResponseEntity
                     .status(201)
                     .body("book with ID " + id + " was updated.");
+        }
+
+        else {
+            logger.info("book with ID " + id + " does not exist.");
+            return ResponseEntity
+                    .status(404)
+                    .body("book with ID " + id + " does not exist.");
+        }
+    }
+
+    @PatchMapping("/ChangeTitle/{id}")
+    @Description("Change title of book.")
+    public ResponseEntity<String> patchBook(@PathVariable("id") Long id, @RequestBody BookDTO book){
+        logger.info("changing title of book...");
+        boolean wasUpdated = bookService.patchTitleBook(id,book);
+        if(wasUpdated){
+            logger.info("book with ID " + id + " was patched.");
+            return ResponseEntity
+                    .status(201)
+                    .body("book with ID " + id + " was patched.");
         }
 
         else {
