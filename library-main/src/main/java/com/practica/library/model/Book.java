@@ -1,5 +1,9 @@
 package com.practica.library.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,8 +15,11 @@ import java.time.LocalDateTime;
 //@Setter
 //@AllArgsConstructor
 //@NoArgsConstructor
+@Entity
 public class Book {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String author;
@@ -22,6 +29,8 @@ public class Book {
         this.author = author;
         this.name = name;
     }
+
+    public Book() {}
 
     public Long getId() {
         return id;

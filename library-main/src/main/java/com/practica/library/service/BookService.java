@@ -55,7 +55,7 @@ public class BookService {
         return bookRepository.updateBook(id,mapper.convertValue(book,Book.class));
     }
 
-    public boolean patchTitleBook(Long id, BookDTO book) {
+    public boolean patchNameBook(Long id, BookDTO book) {
         return bookRepository.patchTitleBook(id,mapper.convertValue(book,Book.class));
     }
 }

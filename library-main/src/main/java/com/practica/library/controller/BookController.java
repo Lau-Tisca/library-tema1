@@ -3,10 +3,11 @@ package com.practica.library.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.practica.library.model.Book;
 import com.practica.library.model.BookDTO;
+import com.practica.library.model.PatchBookNameRequest;
 import com.practica.library.service.BookService;
-import jakarta.websocket.server.PathParam;
-import jdk.jfr.Description;
+import com.practica.library.service.BookServiceJPA;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.annotation.Description;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,22 +22,27 @@ public class BookController {
     Logger logger = Logger.getLogger("BookController");
 
     private final BookService bookService;
+    private final BookServiceJPA bookServiceJPA;
     private final ObjectMapper mapper;
 
-    public BookController(BookService bookService, ObjectMapper mapper) {
+    public BookController(BookService bookService, ObjectMapper mapper, BookServiceJPA bookServiceJPA) {
         this.bookService = bookService;
         this.mapper = mapper;
+        this.bookServiceJPA = bookServiceJPA;
     }
 
     @GetMapping
     public List<BookDTO> getBook() {
-        return bookService.getBooks();
+
+//        return bookService.getBooks();
+        return bookServiceJPA.getBooks();
     }
 
     @PostMapping
-    public ResponseEntity<String> addBook(BookDTO book){
+    public ResponseEntity<String> addBook(@RequestBody BookDTO book){
         logger.info("adding book: " + book.getName());
-        bookService.addBook(mapper.convertValue(book, Book.class));
+//        bookService.addBook(mapper.convertValue(book, Book.class));
+        bookServiceJPA.saveBook(mapper.convertValue(book, Book.class));
         return ResponseEntity.accepted()
                 .body(book.toString());
     }
@@ -58,7 +64,6 @@ public class BookController {
                     .status(404)
                     .body("book with ID " + id + " does not exist.");
         }
-
     }
 
     @PutMapping("/book/{id}")
@@ -80,11 +85,21 @@ public class BookController {
         }
     }
 
-    @PatchMapping("/ChangeTitle/{id}")
-    @Description("Change title of book.")
-    public ResponseEntity<String> patchBook(@PathVariable("id") Long id, @RequestBody BookDTO book){
-        logger.info("changing title of book...");
-        boolean wasUpdated = bookService.patchTitleBook(id,book);
+    @PutMapping("/jpa/{id}")
+    public ResponseEntity<BookDTO> updateBookJPA(@PathVariable("id") Long id, @RequestBody BookDTO book){
+        logger.info("updating book: " + book);
+        Book book1 = mapper.convertValue(book, Book.class);
+        book1.setId(id);
+        return ResponseEntity.ok(bookServiceJPA.saveBook(book1));
+    }
+
+    @PatchMapping("/{id}/name")
+    @Description("Change name of book.")
+    public ResponseEntity<String> patchBook(
+            @PathVariable("id") Long id,
+            @RequestBody BookDTO book) {
+        logger.info("changing name of book...");
+        boolean wasUpdated = bookService.patchNameBook(id,book);
         if(wasUpdated){
             logger.info("book with ID " + id + " was patched.");
             return ResponseEntity
@@ -100,4 +115,13 @@ public class BookController {
         }
     }
 
+    @PatchMapping("/jpa/{id}/name")
+    @Description("Change name of book. (JPA)")
+    public ResponseEntity<BookDTO> patchBookName(
+            @PathVariable Long id,
+            @RequestBody PatchBookNameRequest request) {
+        BookDTO updatedBook = bookServiceJPA.patchBookNameJPA(id, request.getName());
+
+        return ResponseEntity.ok(updatedBook);
+    }
 }

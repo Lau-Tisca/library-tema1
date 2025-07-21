@@ -19,6 +19,8 @@ public class BookDTO {
         this.name = name;
     }
 
+    public BookDTO() {}
+
     public void setAuthor(String author) {
         this.author = author;
     }
